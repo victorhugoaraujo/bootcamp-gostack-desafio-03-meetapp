@@ -24,6 +24,11 @@ class User extends Model {
     return this;
   }
 
+  // static associate(models) {
+  //   this.hasMany(models.Meetup);
+  //   this.hasMany(models.Subscription);
+  // }
+
   /**
    * Check if password matches
    */
