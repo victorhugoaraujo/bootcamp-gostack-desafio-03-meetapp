@@ -7,7 +7,7 @@ import File from '../models/File';
 class MeetupController {
   async index(req, res) {
     const meetups = await Meetup.findAll({
-      where: { user_id: req.userId },
+      where: {},
       order: ['date'],
       attributes: ['id', 'title', 'description', 'location', 'date'],
       include: [
@@ -16,6 +16,11 @@ class MeetupController {
           as: 'user',
           attributes: ['id', 'name'],
         },
+        {
+          model: File,
+          as: 'file',
+          attributes: ['id', 'path', 'url'],
+        },
       ],
     });
     return res.json(meetups);
@@ -23,7 +28,6 @@ class MeetupController {
 
   async store(req, res) {
     const schema = Yup.object().shape({
-      user_id: Yup.number().required(),
       title: Yup.string().required(),
       description: Yup.string().required(),
       location: Yup.string().required(),
@@ -53,6 +57,52 @@ class MeetupController {
       date,
       file_id,
     });
+
+    return res.json(meetup);
+  }
+
+  async delete(req, res) {
+    const meetup = await Meetup.findByPk(req.params.id);
+
+    if (meetup.user_id !== req.userId) {
+      return res.status(401).json({
+        error: "You don't have permission to cancel this meetup",
+      });
+    }
+
+    if (meetup.past) {
+      return res.status(400).json({ error: "Can't delete past meetups." });
+    }
+
+    await meetup.destroy();
+    return res.send();
+  }
+
+  async update(req, res) {
+    const schema = Yup.object().shape({
+      title: Yup.string(),
+      file_id: Yup.number(),
+      description: Yup.string(),
+      location: Yup.string(),
+      date: Yup.date(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation fails' });
+    }
+
+    const meetup = await Meetup.findByPk(req.params.id);
+
+    if (meetup.user_id !== req.user_id) {
+      return res.status(401).json({
+        error: "You don't have permission to update this meetup",
+      });
+    }
+    if (meetup.past) {
+      return res.status(400).json({ error: "Can't update past meetups." });
+    }
+
+    await meetup.update(req.body);
 
     return res.json(meetup);
   }
