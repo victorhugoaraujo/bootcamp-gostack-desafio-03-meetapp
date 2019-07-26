@@ -1,4 +1,4 @@
-import { Model, Sequelize } from 'sequelize';
+import Sequelize, { Model } from 'sequelize';
 import bcrypt from 'bcryptjs';
 
 class User extends Model {
@@ -23,11 +23,6 @@ class User extends Model {
 
     return this;
   }
-
-  // static associate(models) {
-  //   this.hasMany(models.Meetup);
-  //   this.hasMany(models.Subscription);
-  // }
 
   /**
    * Check if password matches
