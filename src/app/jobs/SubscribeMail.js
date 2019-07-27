@@ -11,8 +11,6 @@ class SubscribeMail {
   async handle({ data }) {
     const { user } = data;
 
-    console.log('é nois que voa bruxao!');
-
     await Mail.sendMail({
       to: `${user.name} <${user.email}>`,
       subject: 'Inscrição confirmada',
