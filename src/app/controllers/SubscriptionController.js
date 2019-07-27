@@ -2,7 +2,8 @@ import { Op } from 'sequelize';
 import Subscription from '../models/Subscription';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
-import Mail from '../../lib/Mail';
+import Queue from '../../lib/Queue';
+import SubscribeMail from '../jobs/SubscribeMail';
 
 class SubscriptionController {
   async index(req, res) {
@@ -73,10 +74,8 @@ class SubscriptionController {
       meetup_id: meetup.id,
     });
 
-    await Mail.sendMail({
-      to: `${user.name} <${user.email}>`,
-      subject: 'Inscrição confirmada',
-      text: 'Estamos esperando por voce!',
+    await Queue.add(SubscribeMail.key, {
+      user,
     });
 
     return res.json(subscriptions);
